@@ -5,9 +5,14 @@ from telegram.ext import (
     MessageHandler,
     filters
 )
+import os
 
 TOKEN = "8570445991:AAHvyZ-EmPztUP0zOYhLPvzbe54IYgVOI0o"
 OWNER_ID = 6587658540
+
+# 🔥 ABSOLUTE PATH FIX (VERY IMPORTANT)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PFP_PATH = os.path.join(BASE_DIR, "pfp.jpg")
 
 TERMS_MESSAGE = """Hey, Please state the terms of the deal.
 
@@ -35,7 +40,18 @@ def owner_only(func):
 @owner_only
 async def setup(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
+
+    # Group title
     await chat.set_title("Adu MM | @middlemem")
+
+    # 🔥 PROFILE PIC CHANGE (THIS WAS MISSING)
+    if os.path.exists(PFP_PATH):
+        with open(PFP_PATH, "rb") as photo:
+            await context.bot.set_chat_photo(
+                chat_id=chat.id,
+                photo=photo
+            )
+
     msg = await update.message.reply_text(TERMS_MESSAGE)
     await msg.pin()
 
@@ -60,7 +76,7 @@ async def received(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 app = ApplicationBuilder().token(TOKEN).build()
 
-# DOT COMMAND HANDLERS
+# DOT COMMANDS ONLY
 app.add_handler(MessageHandler(filters.Regex(r"^\.setup$"), setup))
 app.add_handler(MessageHandler(filters.Regex(r"^\.lock$"), lock))
 app.add_handler(MessageHandler(filters.Regex(r"^\.unlock$"), unlock))
